@@ -505,7 +505,6 @@ how to fix it, please visit the webpage mentioned above.
 |---|---|---|---|
 | 1 | google.com.    300    IN    A    142.250.x.x | - | - |
 | 2 | Висновок | - | - |
-| 3 | | | |
 
 ### Підтвердження
 
