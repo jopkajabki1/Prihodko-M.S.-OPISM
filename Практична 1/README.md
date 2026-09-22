@@ -425,11 +425,11 @@ how to fix it, please visit the webpage mentioned above.
 
 | № | Назва групи (власне формулювання) | Рядки виводу, віднесені до групи | Обґрунтування |
 |---|---|---|---|
-| 1 | відповідь сервера | HTML | сторінка сайту |
-| 2 | DNS | | ip адреси |
-| 3 | handshake | | встановлення зв'язку |
-| 4 | перевірка сертифікатів | не вставив рядки бо "ламається" таблиця | |
-| 5 | запит на сторінку | GET / HTTP/2 | |
+| 1 | Відповідь сервера | `<HTTP/1.1 302 Found`<br>`<Server: Apache/2.4.55 (DragonFly) OpenSSL/1.1.1t`<br>`<Location: https://www.dragonflybsd.org/`<br>`<Content-Length: 213`<br>`<Content-Type: text/html; charset=iso-8859-1`<br>`<`<br>`<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">`<br>`<html><head>`<br>`<title>302 Found</title>`<br>`</head><body>`<br>`<h1>Found</h1>`<br>`<p>The document has moved <a href="https://www.dragonflybsd.org/">here</a>.</p>`<br>`</body></html>` | Показує результат обробки запиту сервером та дані, які сервер повернув клієнту. |
+| 2 | DNS | `* Host dragonflybsd.org:443 was resolved.`<br>`* IPv6: 2001:470:1:43b:1::67`<br>`* IPv4: 199.233.90.67`<br>`*   Trying [2001:470:1:43b:1::67]:443...`<br>`* Immediate connect fail for 2001:470:1:43b:1::67: Network is unreachable`<br>`* connect to 2001:470:1:43b:1::67 port 443 from :: port 0 failed: Network is unreachable`<br>`*   Trying 199.233.90.67:443...` | Показує процес перетворення доменного імені сайту на IP-адресу сервера. |
+| 3 | HTTP-запит до сторінки | `* using HTTP/1.x`<br>`> GET / HTTP/1.1`<br>`> Host: dragonflybsd.org`<br>`> User-Agent: curl/8.21.0`<br>`> Accept: */*`<br>`* Request completely sent off` | Клієнт формує HTTP-запит із методом GET для отримання головної сторінки сервера. |
+| 4 | TLS handshake | `* ALPN: curl offers h2,http/1.1`<br>`* TLSv1.3 (OUT), TLS handshake, Client hello (1):`<br>`* TLSv1.3 (IN), TLS handshake, Server hello (2):`<br>`* TLSv1.3 (IN), TLS change cipher, Change cipher spec (1):`<br>`* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):`<br>`* TLSv1.3 (IN), TLS handshake, Certificate (11):`<br>`* TLSv1.3 (IN), TLS handshake, CERT verify (15):`<br>`* TLSv1.3 (IN), TLS handshake, Finished (20):`<br>`* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):`<br>`* TLSv1.3 (OUT), TLS handshake, Finished (20):`<br>`* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):`<br>`* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):`<br>`* ALPN: server accepted http/1.1` | Ці рядки показують встановлення захищеного з'єднання між клієнтом і сервером. |
+| 5 | Перевірка сертифіката | `* SSL Trust Anchors:`<br>`*   CAfile: /etc/ssl/certs/ca-certificates.crt`<br>`*   CApath: /etc/ssl/certs`<br>`* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / x25519 / id-ecPublicKey`<br>`* Server certificate:`<br>`*   Certificate level 0: Public key type EC/secp384r1 (384/192 Bits/secBits), signed using ecdsa-with-SHA384`<br>`*   Certificate level 1: Public key type EC/secp384r1 (384/192 Bits/secBits), signed using ecdsa-with-SHA384`<br>`*   Certificate level 2: Public key type EC/secp384r1 (384/192 Bits/secBits), signed using ecdsa-with-SHA384`<br>`*   Certificate level 3: Public key type EC/secp384r1 (384/192 Bits/secBits), signed using ecdsa-with-SHA384`<br>`*   subjectAltName: "dragonflybsd.org" matches cert's "dragonflybsd.org"`<br>`* OpenSSL verify result: 0`<br>`* SSL certificate verified via OpenSSL.` | Рядки містять інформацію про сертифікат сервера та результат його перевірки клієнтом. |
 
 
 *Групи впорядковано від найближчої до користувача (№ 1) до найближчої до апаратного забезпечення. Зайві рядки вилучити, за потреби — додати.*
@@ -438,9 +438,8 @@ how to fix it, please visit the webpage mentioned above.
 
 | Рядок виводу | Причина утруднення |
 |---|---|
-| | |
-| | |
-| | |
+| `* Established connection to dragonflybsd.org (199.233.90.67 port 443) from 192.168.188.129 port 33230` | Встановлення TCP-з'єднання |
+| `* Request completely sent off` | Завершення з'єднання |
 
 ---
 
