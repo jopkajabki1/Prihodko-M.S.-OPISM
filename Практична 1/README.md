@@ -125,68 +125,39 @@ curl: (7) Failed to connect to neverssl.com:80 after 21124 ms: Could not connect
 **Команда (перше виконання):**
 
 ```
-dig dragonflybsd.org
+Resolve-DnsName dragonflybsd.org
 ```
 
 **Вивід:**
 
 ```
-; <<>> DiG 9.20.26-1~deb13u1-Debian <<>> dragonflybsd.org
-;; global options: +cmd
-;; Got answer:
-;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 3296
-;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
-
-;; OPT PSEUDOSECTION:
-; EDNS: version: 0, flags:; MBZ: 0x0005, udp: 512
-;; QUESTION SECTION:
-;dragonflybsd.org.              IN      A
-
-;; ANSWER SECTION:
-dragonflybsd.org.       5       IN      A       199.233.90.67
-
-;; Query time: 82 msec
-;; SERVER: 192.168.188.2#53(192.168.188.2) (UDP)
-;; WHEN: Wed Sep 09 15:25:59 EEST 2026
-;; MSG SIZE  rcvd: 61
+Name                                           Type   TTL   Section    IPAddress
+----                                           ----   ---   -------    ---------
+dragonflybsd.org                               AAAA   3600  Answer     2001:470:1:43b:1::67
+dragonflybsd.org                               A      3600  Answer     199.233.90.67
 ```
 
 **Команда (повторне виконання через 5–7 хвилин):**
-
 ```
-dig dragonflybsd.org
+Resolve-DnsName dragonflybsd.org
 ```
 
 **Вивід:**
 
 ```
-; <<>> DiG 9.20.26-1~deb13u1-Debian <<>> dragonflybsd.org
-;; global options: +cmd
-;; Got answer:
-;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 55910
-;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
-
-;; OPT PSEUDOSECTION:
-; EDNS: version: 0, flags:; MBZ: 0x0005, udp: 512
-;; QUESTION SECTION:
-;dragonflybsd.org.              IN      A
-
-;; ANSWER SECTION:
-dragonflybsd.org.       5       IN      A       199.233.90.67
-
-;; Query time: 86 msec
-;; SERVER: 192.168.188.2#53(192.168.188.2) (UDP)
-;; WHEN: Wed Sep 09 15:32:42 EEST 2026
-;; MSG SIZE  rcvd: 61
+Name                                           Type   TTL   Section    IPAddress
+----                                           ----   ---   -------    ---------
+dragonflybsd.org                               AAAA   3433  Answer     2001:470:1:43b:1::67
+dragonflybsd.org                               A      3600  Answer     199.233.90.67
 ```
 
 **Зафіксовані значення:**
 
 | Параметр | Перше виконання | Повторне виконання |
 |---|---|---|
-| Час виконання (год:хв) | 15:25 | 15:32 |
+| Час виконання (год:хв) | 20:56 | 21:01 |
 | IP-адреса | 199.233.90.67 | 199.233.90.67 |
-| Значення TTL | 5 | 5 |
+| Значення TTL | 3600 | 3433 |
 
 > Якщо друге значення TTL виявилося більшим за перше — це нормально: кеш резолвера встиг оновитися. Зафіксуйте як є.
 
@@ -459,7 +430,7 @@ how to fix it, please visit the webpage mentioned above.
 
 **4. Як змінилося значення TTL між двома запитами (A.3)? Що означає це число?**
 
-> Ніяк. Час у секундах протягом якого DNS зберігає кеш
+> Зменшився. Час у секундах протягом якого DNS зберігає кеш
 
 **5. Чим відрізняються між собою три причини помилок із завдання A.5? Сформулювати кожну однією фразою.**
 
@@ -489,7 +460,7 @@ how to fix it, please visit the webpage mentioned above.
 
 *Назвати конкретно, з посиланням на рядок виводу.*
 
-> Що TSL = 5    dragonflybsd.org.       5       IN      A       199.233.90.67
+> Що TSL = 5    <br>`dragonflybsd.org.       5       IN      A       199.233.90.67`
 
 **D.2. Чому саме така кількість груп у частині B**
 
@@ -499,7 +470,7 @@ how to fix it, please visit the webpage mentioned above.
 
 **D.3. Питання, яке залишилося без відповіді**
 
-> Нема
+> Чому dig робить саме такий вивід
 
 ---
 
@@ -548,4 +519,4 @@ how to fix it, please visit the webpage mentioned above.
 
 *(необов'язковий розділ: що не спрацювало, які команди довелося змінити, які виникли труднощі)*
 
-> Неможу вставити рядки у таблицю В бо ламається структура
+> dig dragonflybsd.org виводить <br>`; <<>> DiG 9.20.26-1~deb13u1-Debian <<>> dragonflybsd.org`<br>`; <<>> DiG 9.20.26-1~deb13u1-Debian <<>> dragonflybsd.org`<br>`;; global options: +cmd`<br>`;; Got answer:`<br>`;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 3296`<br>`;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1`<br>`;; OPT PSEUDOSECTION:`<br>`; EDNS: version: 0, flags:; MBZ: 0x0005, udp: 512`<br>`;; QUESTION SECTION:`<br>`;dragonflybsd.org.              IN      A`<br>`;; ANSWER SECTION:`<br>`dragonflybsd.org.       5       IN      A       199.233.90.67`<br>`;; Query time: 82 msec`<br>`;; SERVER: 192.168.188.2#53(192.168.188.2) (UDP)`<br>`;; WHEN: Wed Sep 09 15:25:59 EEST 2026`<br>`;; MSG SIZE  rcvd: 61`<br>TTL завжди 5 а Resolve-DnsName dragonflybsd.org <br>`Name                                           Type   TTL   Section    IPAddress`<br>`----                                           ----   ---   -------    --------- `<br>`dragonflybsd.org                               AAAA   3600  Answer     2001:470:1:43b:1::67`<br>`dragonflybsd.org                               A      3600  Answer     199.233.90.67`<br> TTL відображається нормально 3600. Тому хоч я і робив на linux це завдання я робив в PowerShell
