@@ -33,29 +33,32 @@ nc -C example.net 80
 ```
 GET / HTTP/1.1
 Host: example.net
-Connectoin: close
+Connection: close
 ```
 
 **Відповідь:**
 
 ```
 HTTP/1.1 200 OK
-Date: Mon, 05 Oct 2026 18:59:06 GMT
+Date: Mon, 05 Oct 2026 19:05:58 GMT
 Content-Type: text/html; charset=utf-8
 Transfer-Encoding: chunked
-Connection: keep-alive
+Connection: close
 Server: cloudflare
 Last-Modified: Fri, 02 Oct 2026 16:11:02 GMT
 Allow: GET, HEAD
 Accept-Ranges: bytes
-Age: 8161
+Age: 8573
 Cache-Control: max-age=14400
 cf-cache-status: HIT
-CF-RAY: a45ea9580927b607-WAW
+CF-RAY: a45eb363cd73b607-WAW
 alt-svc: h3=":443"; ma=86400
 
 241
 <!doctype html><html lang=en><head><meta charset=utf-8><link rel=icon href=data:,><meta name=viewport content="width=device-width,initial-scale=1"><title>Example Domain</title><style>html{color-scheme:light dark;background:light-dark(#eee,#222)}body{font:16px/1.6 system-ui,sans-serif;max-width:26em;margin:auto;padding:25vh 2em 2em;text-align:center}</style></head><body><p>This domain is for use in documentation examples without needing permission. This is not a service; avoid relying on it for testing and monitoring purposes.</p><script src=/s.js></script></body></html>
+
+0
+
 ```
 
 ---
@@ -318,7 +321,7 @@ curl -v --http1.1 http://example.net/ -o /dev/null
 | № | Поле заголовка | Значення | Призначення (власне формулювання) | Походження: сервер / проміжний вузол / не визначено | Обґрунтування |
 |---|---|---|---|---|---|
 | 1 | HTTP/1.1 | 200 OK | Статус відповіді | сервер | `Генерується вебсервером для підтвердження обробки запиту` |
-| 2 | Date | Mon, 05 Oct 2026 18:00:37 GMT | Час створення запиту | сервер | `Заголовок створений сервером для фіксації часу` |
+| 2 | Date | Mon, 05 Oct 2026 19:05:58 GMT | Час створення запиту | сервер | `Заголовок створений сервером для фіксації часу` |
 | 3 | Content-Type | text/html; charset=utf-8 | Визначаж тип данних | сервер | `Вказується сервером залежно від формату ресурсу `|
 | 4 | Transfer-Encoding | chunked | Застосовує передачу даних частинами | cервер | `Застосовує передачу даних частинами` |
 | 5 | Connection | close | Стан мережевого з'єднання | сервер | `Вказується сервером для керування життєциклом сокета` |
@@ -346,7 +349,7 @@ curl -v --http1.1 http://example.net/ -o /dev/null
 
 **D.2.** Яке з полів заголовка викликало найбільше утруднення при визначенні походження (частина B) та з якої причини.
 
-<текст>
+Найбільше утруднення у частині B викликало визначення точного походження стандартних полів Date, Transfer-Encoding: chunked, Connection: keep-alive та Cache-Control: max-age=14400. Наявність у відповіді полів Server: cloudflare, cf-cache-status: HIT та Age: 8161 прямо вказує на те, що відповідь була сформована та віддана кешуючим проміжним вузлом CDN Cloudflare (дата-центр у Варшаві, CF-RAY: a45ea9580927b607-WAW), без прямого звернення до первинного вебсервера (origin server) у момент запиту.
 
 **D.3.** Яке питання залишилося без відповіді після виконання роботи.
 
