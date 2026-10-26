@@ -61,8 +61,7 @@
 ### 1.2. Перевірка (після завдання 3)
 
 <!-- Для URI 1–3: рядки запиту (починаються з ">") і тіло відповіді сервера. -->
-<br><br>Вивід: `curl -v 'http://www.cs-202-21.lab/reports/catalog?from=61&lang=x#comments'`
-
+curl -v 'http://www.cs-202-21.lab/reports/catalog?from=61&lang=x#comments'
 ```text
 * Host www.cs-202-21.lab:80 was resolved.
 * IPv6: (none)
@@ -90,8 +89,7 @@ client: 10.53.1.1
 * Connection #0 to host www.cs-202-21.lab left intact
 
 ```
-<br><br>Вивід: `curl -v 'http://files.cs-202-21.lab:80/catalog/?from=%D0%BA%D0%B8%D1%97%D0%B2'`
-
+curl -v 'http://files.cs-202-21.lab:80/catalog/?from=%D0%BA%D0%B8%D1%97%D0%B2'
 ```text
 * Host files.cs-202-21.lab:80 was resolved.
 * IPv6: (none)
@@ -118,8 +116,7 @@ query: from=%D0%BA%D0%B8%D1%97%D0%B2
 client: 10.53.1.1
 * Connection #0 to host files.cs-202-21.lab left intact
 ```
-<br><br>Вивід: `curl -v 'http://user:pass@test.cs-202-21.lab/reports#results'`
-
+curl -v 'http://user:pass@test.cs-202-21.lab/reports#results'
 ```text
 * Host test.cs-202-21.lab:80 was resolved.
 * IPv6: (none)
@@ -150,14 +147,14 @@ client: 10.53.1.1
 ```
 
 Значення заголовка `Authorization` і результат декодування:
-<br><br>Вивід: `echo 'dXNlcjpwYXNz' | base64 -d`
+Вивід: `echo 'dXNlcjpwYXNz' | base64 -d`
 ```text
  user:pass
 ```
 
 URI 4: етап, на якому запит не вдається (пошук імені / TCP / TLS), і рядки виводу, що це підтверджують:
 
-<br>TCP (DNS уже спрацював — ім'я розірвалося в 10.53.0.80; TLS не починався, тому що з'єднання не встановилося).
+TCP (DNS уже спрацював — ім'я розірвалося в 10.53.0.80; TLS не починався, тому що з'єднання не встановилося).
 
 ```text
 * Host test.cs-202-21.lab:80 was resolved.
@@ -205,9 +202,83 @@ curl: (7) Failed to connect to www.cs-202-21.lab port 8443 after 122 ms: Couldn'
 Розбіжності між URI та тим, що отримав сервер, і їх пояснення:<br>curl сам нормалізує .. перед надсиланням; з --path-as-is він надсилає все як є, але nginx усе одно нормалізує $uri, тому шлях однаковий.
 
 ## Завдання 2. Проходження ієрархії вручну
-
+dig @10.53.0.2 ns.cs-202-21.lab A +norec
 ```text
+; <<>> DiG 9.18.39-0ubuntu0.24.04.8-Ubuntu <<>> @10.53.0.2 ns.cs-202-21.lab A +norec
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 28839
+;; flags: qr; QUERY: 1, ANSWER: 0, AUTHORITY: 1, ADDITIONAL: 2
 
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+; COOKIE: 41f2e85c2bfaf0da010000006adfaab36656d5a3675175bb (good)
+;; QUESTION SECTION:
+;ns.cs-202-21.lab.              IN      A
+
+;; AUTHORITY SECTION:
+lab.                    172800  IN      NS      ns1.nic.lab.
+
+;; ADDITIONAL SECTION:
+ns1.nic.lab.            172800  IN      A       10.53.0.3
+
+;; Query time: 80 msec
+;; SERVER: 10.53.0.2#53(10.53.0.2) (UDP)
+;; WHEN: Mon Oct 26 19:32:03 UTC 2026
+;; MSG SIZE  rcvd: 117
+```
+dig @10.53.0.3 ns.cs-202-21.lab A +norec
+```text
+; <<>> DiG 9.18.39-0ubuntu0.24.04.8-Ubuntu <<>> @10.53.0.3 ns.cs-202-21.lab A +norec
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 43750
+;; flags: qr; QUERY: 1, ANSWER: 0, AUTHORITY: 1, ADDITIONAL: 2
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+; COOKIE: 83ea0aea9b35d19f010000006adfaab305c1ebe48998d59a (good)
+;; QUESTION SECTION:
+;ns.cs-202-21.lab.              IN      A
+
+;; AUTHORITY SECTION:
+cs-202-21.lab.          3600    IN      NS      ns.cs-202-21.lab.
+
+;; ADDITIONAL SECTION:
+ns.cs-202-21.lab.       3600    IN      A       10.53.1.1
+
+;; Query time: 80 msec
+;; SERVER: 10.53.0.3#53(10.53.0.3) (UDP)
+;; WHEN: Mon Oct 26 19:32:03 UTC 2026
+;; MSG SIZE  rcvd: 103
+```
+dig @10.53.1.1 ns.cs-202-21.lab A +norec
+```text
+; <<>> DiG 9.18.39-0ubuntu0.24.04.8-Ubuntu <<>> @10.53.1.1 ns.cs-202-21.lab A +norec
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 14513
+;; flags: qr aa; QUERY: 1, ANSWER: 1, AUTHORITY: 1, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+; COOKIE: 39f6d38c573e5146010000006adfaab3df4eeccfa3b55e57 (good)
+;; QUESTION SECTION:
+;ns.cs-202-21.lab.              IN      A
+
+;; ANSWER SECTION:
+ns.cs-202-21.lab.       75      IN      A       10.53.1.1
+
+;; AUTHORITY SECTION:
+cs-202-21.lab.          75      IN      NS      ns.cs-202-21.lab.
+
+;; Query time: 0 msec
+;; SERVER: 10.53.1.1#53(10.53.1.1) (UDP)
+;; WHEN: Mon Oct 26 19:32:03 UTC 2026
+;; MSG SIZE  rcvd: 103
 ```
 
 | Сервер | status | flags | ANSWER | AUTHORITY | ADDITIONAL |
@@ -216,8 +287,7 @@ curl: (7) Failed to connect to www.cs-202-21.lab port 8443 after 122 ms: Couldn'
 | 10.53.0.3 | NOERROR | qr | 0 | `cs-202-21.lab.          3600    IN      NS      ns.cs-202-21.lab.` |  `ns.cs-202-21.lab.       3600    IN      A       10.53.1.1` |
 | 10.53.1.1 | NOERROR | qr aa | `ns.cs-202-21.lab.       75      IN      A       10.53.1.1` | `cs-202-21.lab.          75      IN      NS      ns.cs-202-21.lab.` | - |
 
-Вивід `dig ns.sNN.lab A +trace`:
-
+dig ns.sNN.lab A +trace
 ```
 ; <<>> DiG 9.18.39-0ubuntu0.24.04.8-Ubuntu <<>> ns.cs-202-21.lab A +trace
 ;; global options: +cmd
@@ -249,7 +319,7 @@ cs-202-21.lab.          75      IN      NS      ns.cs-202-21.lab.
 
 ## Завдання 3. Заповнення власної зони
 
-Вивід `zone-reload`:
+zone-reload
 
 ```
 zone cs-202-21.lab/IN: loaded serial 2026102602
@@ -269,8 +339,7 @@ zone reload queued
 | другий хост A | NOERROR | qr aa | 10.53.0.81 | 25 | так |
 
 Порівняння відповідей резолвера та власного сервера:
-<br><br><br>Вивід: `dig files.cs-202-21.lab`
-
+dig files.cs-202-21.lab
 ```
 ; <<>> DiG 9.18.39-0ubuntu0.24.04.8-Ubuntu <<>> files.cs-202-21.lab
 ;; global options: +cmd
@@ -293,7 +362,7 @@ www.cs-202-21.lab.      75      IN      A       10.53.0.80
 ;; MSG SIZE  rcvd: 82
 
 ```
-<br><br>Вивід: `dig @10.53.1.1 files.cs-202-21.lab +norec`
+dig @10.53.1.1 files.cs-202-21.lab +norec
 ```
 ; <<>> DiG 9.18.39-0ubuntu0.24.04.8-Ubuntu <<>> @10.53.1.1 files.cs-202-21.lab +norec
 ; (1 server found)
@@ -324,7 +393,7 @@ ns.cs-202-21.lab.       75      IN      A       10.53.1.1
 ;; MSG SIZE  rcvd: 143
 
 ```
-<br><br>Вивід: `dig cs-202-21.lab MX`
+dig cs-202-21.lab MX
 ```
 ; <<>> DiG 9.18.39-0ubuntu0.24.04.8-Ubuntu <<>> cs-202-21.lab MX
 ;; global options: +cmd
@@ -346,7 +415,7 @@ cs-202-21.lab.          75      IN      MX      40 mail.cs-202-21.lab.
 ;; MSG SIZE  rcvd: 63
 
 ```
-<br><br>Вивід: `dig @10.53.1.1 cs-202-21.lab MX +norec`
+dig @10.53.1.1 cs-202-21.lab MX +norec
 ```
 ; <<>> DiG 9.18.39-0ubuntu0.24.04.8-Ubuntu <<>> @10.53.1.1 cs-202-21.lab MX +norec
 ; (1 server found)
@@ -484,7 +553,7 @@ cs-202-21.lab.          60      IN      SOA     ns.cs-202-21.lab. admin.cs-202-2
 ```
 
 Запит через resolver-a 18:15:50, час `zone-reload` 18:15:50, перевірка на сервері 10.53.0.80:
-<br><br>date +%T  &  dig new-nxodo.cs-202-21.lab
+date +%T  &  dig new-nxodo.cs-202-21.lab
 ```text
 18:15:50
 
@@ -507,14 +576,14 @@ cs-202-21.lab.          60      IN      SOA     ns.cs-202-21.lab. admin.cs-202-2
 ;; WHEN: Mon Oct 26 18:15:50 UTC 2026
 ;; MSG SIZE  rcvd: 97
 ```
-<br>zone-reload  &  date +%T
+zone-reload  &  date +%T
 ```
 zone cs-202-21.lab/IN: loaded serial 2026102612
 OK
 zone reload queued
 18:17:10
 ```
-<br>dig @10.53.1.1 new-nxodo.cs-202-21.lab +norec +short
+dig @10.53.1.1 new-nxodo.cs-202-21.lab +norec +short
 ```
 10.53.0.80
 ```
@@ -553,22 +622,22 @@ zone reload queued
 | D: `www.sNN.lab` після перезапуску резолвера | 402 msec | 0 msec |
 
 Вивід вимірювань:
-<br> A=y$RANDOM.cs-202-21.lab; dig $A | grep 'Query time'; dig $A | grep 'Query time'
+A=y$RANDOM.cs-202-21.lab; dig $A | grep 'Query time'; dig $A | grep 'Query time'
 ```text
 ;; Query time: 0 msec
 ;; Query time: 0 msec
 ```
-<br>B=x$RANDOM.lab; dig $B | grep 'Query time'; dig $B | grep 'Query time'
+B=x$RANDOM.lab; dig $B | grep 'Query time'; dig $B | grep 'Query time'
 ```text
 ;; Query time: 41 msec
 ;; Query time: 0 msec
 ```
-<br>C=x$RANDOM.zz$RANDOM; dig $C | grep 'Query time'; dig $C | grep 'Query time'
+C=x$RANDOM.zz$RANDOM; dig $C | grep 'Query time'; dig $C | grep 'Query time'
 ```text
 ;; Query time: 81 msec
 ;; Query time: 0 msec
 ```
-<br>dig www.cs-202-21.lab | grep 'Query time'  &  dig www.cs-202-21.lab | grep 'Query time'
+dig www.cs-202-21.lab | grep 'Query time'  &  dig www.cs-202-21.lab | grep 'Query time'
 ```tex
 ;; Query time: 402 msec
 ;; Query time: 0 msec
@@ -584,7 +653,7 @@ zone reload queued
 Значення `time_namelookup` з `curl` після перезапуску резолвера: 0.403551
 
 Фрагменти журналів запитів root, TLD і власного сервера для рядка D:
-<br> docker compose -f stand/compose.yaml exec root tail -n 20 /var/log/named/queries.log
+docker compose -f stand/compose.yaml exec root tail -n 20 /var/log/named/queries.log
 ```text
 26-Oct-2026 17:48:29.970 client @0x713b18006078 10.53.0.53#11173 (.): query: . IN NS -E(0)DC (10.53.0.2)
 26-Oct-2026 17:48:30.051 client @0x713b0c06ac88 10.53.0.53#27218 (a.root-servers.net): query: a.root-servers.net IN A -E(0)DC (10.53.0.2)
@@ -601,7 +670,7 @@ zone reload queued
 26-Oct-2026 18:43:29.676 client @0x713b0c06ac88 10.53.0.53#58052 (www.cs-202-21.lab): query: www.cs-202-21.lab IN AAAA -E(0)DC (10.53.0.2)
 26-Oct-2026 18:43:29.676 client @0x713b18006078 10.53.0.53#45087 (www.cs-202-21.lab): query: www.cs-202-21.lab IN A -E(0)DC (10.53.0.2)
 ```
-<br>docker compose -f stand/compose.yaml exec tld tail -n 20 /var/log/named/queries.log
+docker compose -f stand/compose.yaml exec tld tail -n 20 /var/log/named/queries.log
 ```text
 26-Oct-2026 17:48:30.252 client @0x738f0c06ac88 10.53.0.53#24233 (ns.cs-202-21.lab): query: ns.cs-202-21.lab IN A -E(0)DC (10.53.0.3)
 26-Oct-2026 17:48:30.899 client @0x738f0c06ac88 10.53.0.54#37647 (ns.cs-202-21.lab): query: ns.cs-202-21.lab IN A -E(0)DC (10.53.0.3)
@@ -632,6 +701,7 @@ test.cs-202-21.lab.     25      IN      A       10.53.0.81
 
 Запити із заміром часу (крок 5):
 
+time dig @10.53.0.53 test.cs-202-21.lab +tries=1 +timeout=30
 ```text
 ; <<>> DiG 9.18.39-0ubuntu0.24.04.8-Ubuntu <<>> @10.53.0.53 test.cs-202-21.lab +tries=1 +timeout=30
 ; (1 server found)
@@ -654,7 +724,9 @@ test.cs-202-21.lab.     25      IN      A       10.53.0.81
 real    0m0.024s
 user    0m0.009s
 sys     0m0.002s
-
+```
+time dig @10.53.0.53 test.cs-202-21.lab +tries=1 +timeout=30
+```text
 ; <<>> DiG 9.18.39-0ubuntu0.24.04.8-Ubuntu <<>> @10.53.0.53 test.cs-202-21.lab +tries=1 +timeout=30
 ; (1 server found)
 ;; global options: +cmd
@@ -676,7 +748,9 @@ sys     0m0.002s
 real    0m0.022s
 user    0m0.006s
 sys     0m0.005s
-
+```
+time dig @10.53.0.54 test.cs-202-21.lab +tries=1 +timeout=30
+```text
 ; <<>> DiG 9.18.39-0ubuntu0.24.04.8-Ubuntu <<>> @10.53.0.54 test.cs-202-21.lab +tries=1 +timeout=30
 ; (1 server found)
 ;; global options: +cmd
