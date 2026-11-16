@@ -219,49 +219,122 @@ TLS 1.2: 2
 Вивід кроків 3.1 і 3.2:
 
 ```text
+subject=CN = Pebble Root CA 7c4918
+notBefore=Nov 16 11:11:56 2026 GMT
+notAfter=Nov 16 11:11:56 2056 GMT
 
+curl: (60) SSL certificate problem: self-signed certificate
+More details here: https://curl.se/docs/sslcerts.html
+
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the web page mentioned above.
 ```
 
 Вивід кроку 3.3 (останні рядки `lego` і рядки журналу nginx):
 
 ```text
-
+2026/11/16 12:01:33 [INFO] [www.cs-202-21.lab, status.cs-202-21.lab] acme: Obtaining SAN certificate
+2026/11/16 12:01:33 [INFO] [status.cs-202-21.lab] AuthURL: https://ca.lab:14000/authZ/Vra9iEmuXkBqzI7Pu5KOGSIgqvwOOWiE7V-OlckMFQs
+2026/11/16 12:01:33 [INFO] [www.cs-202-21.lab] AuthURL: https://ca.lab:14000/authZ/nfl4sqW-_W3lrc3DJ6QW3pgA344BUJUzTvQhyNh14gc
+2026/11/16 12:01:33 [INFO] [www.cs-202-21.lab] acme: Could not find solver for: tls-alpn-01
+2026/11/16 12:01:33 [INFO] [www.cs-202-21.lab] acme: use http-01 solver
+2026/11/16 12:01:33 [INFO] [status.cs-202-21.lab] acme: Could not find solver for: tls-alpn-01
+2026/11/16 12:01:33 [INFO] [status.cs-202-21.lab] acme: use http-01 solver
+2026/11/16 12:01:33 [INFO] [www.cs-202-21.lab] acme: Trying to solve HTTP-01
+2026/11/16 12:01:37 [INFO] [www.cs-202-21.lab] The server validated our request
+2026/11/16 12:01:37 [INFO] [status.cs-202-21.lab] acme: Trying to solve HTTP-01
+2026/11/16 12:01:44 [INFO] [status.cs-202-21.lab] The server validated our request
+2026/11/16 12:01:44 [INFO] [www.cs-202-21.lab, status.cs-202-21.lab] acme: Validations succeeded; requesting certificates
+2026/11/16 12:01:44 [INFO] Wait for certificate [timeout: 30s, interval: 500ms]
+2026/11/16 12:01:44 [INFO] [www.cs-202-21.lab] Server responded with a certificate.
+10.53.0.10 - - [16/Nov/2026:12:01:33 +0000] "GET /.well-known/acme-challenge/i0eVOf_uwSEMzIe9i-1L3079vt2gTRPxiwuUWDWxxdg HTTP/1.1" 200 87 "-" "LetsEncrypt-Pebble-VA (linux; amd64)"
+10.53.0.10 - - [16/Nov/2026:12:01:33 +0000] "GET /.well-known/acme-challenge/i0eVOf_uwSEMzIe9i-1L3079vt2gTRPxiwuUWDWxxdg HTTP/1.1" 200 87 "-" "LetsEncrypt-Pebble-VA (linux; amd64)"
+10.53.0.10 - - [16/Nov/2026:12:01:33 +0000] "GET /.well-known/acme-challenge/i0eVOf_uwSEMzIe9i-1L3079vt2gTRPxiwuUWDWxxdg HTTP/1.1" 200 87 "-" "LetsEncrypt-Pebble-VA (linux; amd64)"
+10.53.0.10 - - [16/Nov/2026:12:01:37 +0000] "GET /.well-known/acme-challenge/6v5Sp5FhW66mFgC3wmvYLYip_1NncSfLK8EHuru_1bk HTTP/1.1" 200 87 "-" "LetsEncrypt-Pebble-VA (linux; amd64)"
+10.53.0.10 - - [16/Nov/2026:12:01:37 +0000] "GET /.well-known/acme-challenge/6v5Sp5FhW66mFgC3wmvYLYip_1NncSfLK8EHuru_1bk HTTP/1.1" 200 87 "-" "LetsEncrypt-Pebble-VA (linux; amd64)"
+10.53.0.10 - - [16/Nov/2026:12:01:37 +0000] "GET /.well-known/acme-challenge/6v5Sp5FhW66mFgC3wmvYLYip_1NncSfLK8EHuru_1bk HTTP/1.1" 200 87 "-" "LetsEncrypt-Pebble-VA (linux; amd64)"
 ```
 
 Вивід кроку 3.4:
 
 ```text
+subject=CN = www.cs-202-21.lab
+issuer=CN = Pebble Intermediate CA 478265
+notBefore=Nov 16 12:01:44 2026 GMT
+notAfter=Nov 16 12:01:43 2031 GMT
+serial=01DFE5C8D696CF8D
+X509v3 Subject Alternative Name: 
+    DNS:www.cs-202-21.lab, DNS:status.cs-202-21.lab
 
+subject=CN = Pebble Intermediate CA 478265
+issuer=CN = Pebble Root CA 7c4918
 ```
 
 Вивід кроку 3.5:
 
 ```text
+nginx: the configuration file /lab/nginx.conf syntax is ok
+nginx: configuration file /lab/nginx.conf test is successful
+2026/11/16 12:03:58 [notice] 99#99: signal process started
+curl: (60) SSL certificate problem: unable to get local issuer certificate
+More details here: https://curl.se/docs/sslcerts.html
 
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the web page mentioned above.
+Certificate chain
+ 0 s:CN = www.cs-202-21.lab
+   i:CN = Pebble Intermediate CA 478265
+   a:PKEY: id-ecPublicKey, 256 (bit); sigalg: RSA-SHA256
+   v:NotBefore: Nov 16 12:01:44 2026 GMT; NotAfter: Nov 16 12:01:43 2031 GMT
+---
+Verify return code: 21 (unable to verify the first certificate)
 ```
 
 Вивід кроку 3.6:
 
 ```text
-
+nginx: the configuration file /lab/nginx.conf syntax is ok
+nginx: configuration file /lab/nginx.conf test is successful
+2026/11/16 12:14:17 [notice] 125#125: signal process started
+server: cs-202-21 (https)
+Host: www.cs-202-21.lab
+SNI: www.cs-202-21.lab
+protocol: TLSv1.3
+server: cs-202-21 (https)
+Host: status.cs-202-21.lab
+SNI: status.cs-202-21.lab
+protocol: TLSv1.3
+Certificate chain
+ 0 s:CN = www.cs-202-21.lab
+   i:CN = Pebble Intermediate CA 478265
+   a:PKEY: id-ecPublicKey, 256 (bit); sigalg: RSA-SHA256
+   v:NotBefore: Nov 16 12:01:44 2026 GMT; NotAfter: Nov 16 12:01:43 2031 GMT
+ 1 s:CN = Pebble Intermediate CA 478265
+   i:CN = Pebble Root CA 7c4918
+   a:PKEY: rsaEncryption, 2048 (bit); sigalg: RSA-SHA256
+   v:NotBefore: Nov 16 11:11:56 2026 GMT; NotAfter: Nov 16 11:11:56 2056 GMT
+---
+Verify return code: 0 (ok)
 ```
 
 | Параметр | Значення |
 |---|---|
-| Видавець сертифіката сервера | |
-| Видавець сертифіката видавця | |
-| Імена в SAN | |
-| Строк дії (від – до) | |
-| Тип ключа сервера і алгоритм підпису | |
-| Кількість сертифікатів, які надсилає сервер, у кроці 3.5 і в кроці 3.6 | |
+| Видавець сертифіката сервера | Pebble Intermediate CA 478265 |
+| Видавець сертифіката видавця | Pebble Root CA 7c4918 |
+| Імена в SAN | `www.cs-202-21.lab`, `status.cs-202-21.lab` |
+| Строк дії (від – до) | `Nov 16 12:01:43 2031 GMT` `Nov 16 11:11:56 2056 GMT` |
+| Тип ключа сервера і алгоритм підпису |  `id-ecPublicKey, 256 (bit); sigalg: RSA-SHA256` `rsaEncryption, 2048 (bit); sigalg: RSA-SHA256` |
+| Кількість сертифікатів, які надсилає сервер, у кроці 3.5 і в кроці 3.6 | 3.5 - 1   3.6 - 2 |
 
-1. Хто і як перевірив, що ви контролюєте обидва імена? Вкажіть рядки виводу, які це підтверджують.
+1. Хто і як перевірив, що ви контролюєте обидва імена? Вкажіть рядки виводу, які це підтверджують.<br>Центр сертифікації ACME (LetsEncrypt-Pebble-VA).За допомогою валідатора протоколу ACME через метод HTTP-01, звертаючись до NGINX за спеціальними шляхами.<br>`2026/11/16 12:01:33 [INFO] [www.cs-202-21.lab] acme: Trying to solve HTTP-01`<br>`2026/11/16 12:01:37 [INFO] [www.cs-202-21.lab] The server validated our request`<br>`10.53.0.10 - - [...] "GET /.well-known/acme-challenge/... HTTP/1.1" 200 87`
 
-2. Чому в кроці 3.5 перевірка не пройшла, хоча корінь центру сертифікації вказано в `--cacert`, а сертифікат виданий правильно?
+2. Чому в кроці 3.5 перевірка не пройшла, хоча корінь центру сертифікації вказано в `--cacert`, а сертифікат виданий правильно?<br>Сервер NGINX надіслав лише один сертифікат (кінцевий), але не передав проміжний (Intermediate CA). Через це клієнт (curl) не зміг побудувати повний ланцюжок до довіреного кореня з --cacert, хоча сам корінь був налаштований.
 
-3. У виводі ланцюжка для сертифіката сервера вказано `id-ecPublicKey` і `RSA-SHA256`. Що означає кожне з цих значень і чому вони не суперечать одне одному?
+3. У виводі ланцюжка для сертифіката сервера вказано `id-ecPublicKey` і `RSA-SHA256`. Що означає кожне з цих значень і чому вони не суперечать одне одному?<br>id-ecPublicKey — тип власного ключа сертифіката (ECDSA P-256), RSA-SHA256 — алгоритм підпису видавця над цим сертифікатом. Це різні речі, вони не суперечать одна одній.
 
-4. Що станеться з перевіркою вашого сервера після перезапуску стенда і чому? Що в реальній інфраструктурі відповідає цій ситуації?
+4. Що станеться з перевіркою вашого сервера після перезапуску стенда і чому? Що в реальній інфраструктурі відповідає цій ситуації?<br>Після перезапуску стенда Pebble перестворює корінь — сертифікат перестає проходити перевірку, тому потрібно перевипустити його (кроки 3.1, 3.3, 3.6) та зафіксувати це у звіті. У реальності цьому відповідає ротація кореневого ЦС / короткоживучі сертифікати та автооновлення за протоколом ACME.
 
 ## Завдання 4. Діагностика несправностей
 
