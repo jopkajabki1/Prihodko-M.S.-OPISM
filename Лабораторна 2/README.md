@@ -24,7 +24,7 @@
 |---|---|
 | Віддалений сервер | `front.cs-202-21.lab` |
 | Імена для сертифіката | `www.cs-202-21.lab`, `status.cs-202-21.lab` |
-| Ваш сервер (IP) | 10.53.1.1, зона cs-202-21.lab |
+| Ваш сервер (IP) | `10.53.1.1` |
 
 <!-- Якщо стенд перезапускався під час роботи, вказати, після якого завдання. -->
 
@@ -33,61 +33,178 @@
 Вивід кроку 1.1:
 
 ```text
-
+server: web
+Host: front.cs-202-21.lab
+SNI: 
+protocol: HTTP/1.1 
+client: 10.53.1.1
+10 packets captured
+10 packets received by filter
+0 packets dropped by kernel
+[1]+  Exit 124                timeout 8 tcpdump -ni eth0 -A -s0 -l 'host 10.53.0.80 and tcp port 80' > t1-http.txt
+11:19:20.285890 IP 10.53.1.1.59828 > 10.53.0.80.80: Flags [P.], seq 1:83, ack 1, win 502, options [nop,nop,TS val 4170700716 ecr 1849487437], length 82: HTTP: GET / HTTP/1.1
+....n<.MGET / HTTP/1.1
+Host: front.cs-202-21.lab
+server: web
+Host: front.cs-202-21.lab
 ```
 
 Вивід кроку 1.2:
 
 ```text
-
+server: web
+Host: front.cs-202-21.lab
+SNI: front.cs-202-21.lab
+protocol: HTTP/2.0 TLSv1.3
+client: 10.53.1.1
+23 packets captured
+23 packets received by filter
+0 packets dropped by kernel
+[1]+  Exit 124                timeout 8 tcpdump -ni eth0 -A -s0 -l 'host 10.53.0.80 and tcp port 443' > t1-https.txt
+0
+1
 ```
 
 | Що шукали в дампі | HTTP | HTTPS |
 |---|---|---|
-| рядок запиту `GET /` | | |
-| заголовок `Host` | | |
-| тіло відповіді (`server: web`) | | |
-| ім'я віддаленого сервера (кількість входжень) | | |
+| рядок запиту `GET /` | 1 | 0 |
+| заголовок `Host` | 2 | 0 |
+| тіло відповіді (`server: web`) | є | нема |
+| ім'я віддаленого сервера (кількість входжень) | 2 | 1 |
 
-1. У якому повідомленні і в якому полі передається ім'я сервера, яке видно в дампі HTTPS?
+1. У якому повідомленні і в якому полі передається ім'я сервера, яке видно в дампі HTTPS?<br>У ClientHello (перший запис Handshake після TCP) — розширення server_name (SNI).
 
-2. Чому рядок `SNI:` у відповіді сервера порожній для HTTP і заповнений для HTTPS?
+2. Чому рядок `SNI:` у відповіді сервера порожній для HTTP і заповнений для HTTPS?<br>SNI — це $ssl_server_name, ім'я з TLS-рукопотискання; у HTTP немає TLS, тому там порожньо.
 
-3. Рядок `protocol:` показує HTTP/1.1 для запиту по HTTP і HTTP/2.0 для запиту по HTTPS, хоча обидва запити виконано однією командою `curl` без додаткових ключів. Що визначило версію HTTP у другому випадку?
+3. Рядок `protocol:` показує HTTP/1.1 для запиту по HTTP і HTTP/2.0 для запиту по HTTPS, хоча обидва запити виконано однією командою `curl` без додаткових ключів. Що визначило версію HTTP у другому випадку?<br>ALPN: nginx слухає listen 443 ssl http2, curl через HTTPS пропонує h2,http/1.1, сервер обирає h2. По HTTP/1.1 поверх TCP — ALPN немає.
 
 ## Завдання 2. Рукостискання по записах
 
 Вивід кроку 2.1 (TLS 1.3):
 
 ```text
-
+Sent Record
+  Content Type = Handshake (22)
+    ClientHello, Length=330
+Received Record
+  Content Type = Handshake (22)
+    ServerHello, Length=118
+Received Record
+  Content Type = ChangeCipherSpec (20)
+Received Record
+  Content Type = ApplicationData (23)
+  Inner Content Type = Handshake (22)
+    EncryptedExtensions, Length=15
+Received Record
+  Content Type = ApplicationData (23)
+  Inner Content Type = Handshake (22)
+    Certificate, Length=987
+Received Record
+  Content Type = ApplicationData (23)
+  Inner Content Type = Handshake (22)
+    CertificateVerify, Length=74
+Received Record
+  Content Type = ApplicationData (23)
+  Inner Content Type = Handshake (22)
+    Finished, Length=48
+Sent Record
+  Content Type = ChangeCipherSpec (20)
+Sent Record
+  Content Type = ApplicationData (23)
+  Inner Content Type = Handshake (22)
+    Finished, Length=48
+Sent Record
+  Content Type = ApplicationData (23)
+  Inner Content Type = Alert (21)
+New, TLSv1.3, Cipher is TLS_AES_256_GCM_SHA384
+ALPN protocol: h2
+Verify return code: 0 (ok)
 ```
 
 Вивід кроку 2.2 (TLS 1.2):
 
 ```text
-
+Sent Record
+  Content Type = Handshake (22)
+    ClientHello, Length=225
+Received Record
+  Content Type = Handshake (22)
+    ServerHello, Length=74
+Received Record
+  Content Type = Handshake (22)
+    Certificate, Length=982
+Received Record
+  Content Type = Handshake (22)
+    ServerKeyExchange, Length=111
+Received Record
+  Content Type = Handshake (22)
+    ServerHelloDone, Length=0
+Sent Record
+  Content Type = Handshake (22)
+    ClientKeyExchange, Length=33
+Sent Record
+  Content Type = ChangeCipherSpec (20)
+Sent Record
+  Content Type = Handshake (22)
+    Finished, Length=12
+Received Record
+  Content Type = Handshake (22)
+    NewSessionTicket, Length=214
+Received Record
+  Content Type = ChangeCipherSpec (20)
+Received Record
+  Content Type = Handshake (22)
+    Finished, Length=12
+Received Record
+  Content Type = ApplicationData (23)
+Sent Record
+  Content Type = Alert (21)
+New, TLSv1.2, Cipher is ECDHE-ECDSA-AES256-GCM-SHA384
+ALPN protocol: h2
+    Verify return code: 0 (ok)
 ```
 
 <!-- Один рядок на кожен запис з виводу 2.1, у тому самому порядку. Напрям: К→С або С→К. -->
 
 | № | Напрям | `Content Type` | `Inner Content Type` | Повідомлення | `Length` |
 |---|---|---|---|---|---|
-| 1 | | | | | |
+| 1 | К→С | Handshake (22) | — | ClientHello | 330 |
+| 2 | С→К | Handshake (22) | — | ServerHello | 118 |
+| 3 | С→К | ChangeCipherSpec (20) | — | ChangeCipherSpec | - |
+| 4 | С→К | ApplicationData (23) | Handshake (22) | EncryptedExtensions | 15 |
+| 5 | С→К | ApplicationData (23) | Handshake (22) | Certificate | 987 |
+| 6 | С→К | ApplicationData (23) | Handshake (22) | CertificateVerify | 74 |
+| 7 | С→К | ApplicationData (23) | Handshake (22)  | Finished | 48 |
+| 8 | К→С | ChangeCipherSpec (20) | — | ChangeCipherSpec | - |
+| 9 | К→С | ApplicationData (23) | Handshake (22) | Finished | 48 |
+| 10 | К→С | ApplicationData (23) |  Alert (21)| Alert | - |
 
 Вивід кроків 2.3 і 2.4:
 
 ```text
+        extension_type=server_name(0), length=24
+          0000 - 00 16 00 00 13 66 72 6f-6e 74 2e 63 73 2d 32   .....front.cs-2
+          000f - 30 32 2d 32 31 2e 6c 61-62                     02-21.lab
+        extension_type=ec_point_formats(11), length=4
 
+21 packets captured
+21 packets received by filter
+0 packets dropped by kernel
+TLS 1.3: 0
+
+21 packets captured
+21 packets received by filter
+0 packets dropped by kernel
+TLS 1.2: 2
 ```
 
 | Показник | TLS 1.3 | TLS 1.2 |
 |---|---|---|
-| Довжина ClientHello, байт | | |
-| Номер першого запису, тип якого спостерігач не бачить | | |
-| Кількість RTT від ClientHello до першого HTTP-запиту | | |
-| Чи видно сертифікат у дампі (результат 2.4) | | |
-| Обраний протокол ALPN | | |
+| Довжина ClientHello, байт | 330 | 229 |
+| Номер першого запису, тип якого спостерігач не бачить | 4 | немає |
+| Кількість RTT від ClientHello до першого HTTP-запиту | 1 | 2 |
+| Чи видно сертифікат у дампі (результат 2.4) | ні | так 0 |
+| Обраний протокол ALPN | h2 | h2 |
 
 1. За якими рядками виводу 2.1 визначено, з якого запису починається шифрування? Що бачить спостерігач замість типу кожного наступного запису?
 
