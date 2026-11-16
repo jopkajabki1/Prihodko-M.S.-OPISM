@@ -328,7 +328,7 @@ Verify return code: 0 (ok)
 | Тип ключа сервера і алгоритм підпису |  `id-ecPublicKey, 256 (bit); sigalg: RSA-SHA256` `rsaEncryption, 2048 (bit); sigalg: RSA-SHA256` |
 | Кількість сертифікатів, які надсилає сервер, у кроці 3.5 і в кроці 3.6 | 3.5 - 1   3.6 - 2 |
 
-1. Хто і як перевірив, що ви контролюєте обидва імена? Вкажіть рядки виводу, які це підтверджують.<br>Центр сертифікації ACME (LetsEncrypt-Pebble-VA).За допомогою валідатора протоколу ACME через метод HTTP-01, звертаючись до NGINX за спеціальними шляхами.<br>`2026/11/16 12:01:33 [INFO] [www.cs-202-21.lab] acme: Trying to solve HTTP-01`<br>`2026/11/16 12:01:37 [INFO] [www.cs-202-21.lab] The server validated our request`<br>`10.53.0.10 - - [...] "GET /.well-known/acme-challenge/... HTTP/1.1" 200 87`
+1. Хто і як перевірив, що ви контролюєте обидва імена? Вкажіть рядки виводу, які це підтверджують.<br>Центр сертифікації ACME (LetsEncrypt-Pebble-VA). За допомогою валідатора протоколу ACME через метод HTTP-01, звертаючись до NGINX за спеціальними шляхами.<br>`2026/11/16 12:01:33 [INFO] [www.cs-202-21.lab] acme: Trying to solve HTTP-01`<br>`2026/11/16 12:01:37 [INFO] [www.cs-202-21.lab] The server validated our request`<br>`10.53.0.10 - - [...] "GET /.well-known/acme-challenge/... HTTP/1.1" 200 87`
 
 2. Чому в кроці 3.5 перевірка не пройшла, хоча корінь центру сертифікації вказано в `--cacert`, а сертифікат виданий правильно?<br>Сервер NGINX надіслав лише один сертифікат (кінцевий), але не передав проміжний (Intermediate CA). Через це клієнт (curl) не зміг побудувати повний ланцюжок до довіреного кореня з --cacert, хоча сам корінь був налаштований.
 
@@ -341,22 +341,74 @@ Verify return code: 0 (ok)
 Вивід кроку 4.1:
 
 ```text
-
+=== f1.cs-202-21.lab
+curl: (60) SSL: no alternative certificate subject name matches target host name 'f1.cs-202-21.lab'
+Certificate chain
+ 0 s:CN = legacy.cs-202-21.lab
+   i:O = OPISM Lab, CN = OPISM Stand Intermediate CA
+   v:NotBefore: Nov 16 11:11:54 2026 GMT; NotAfter: Feb 14 11:11:54 2027 GMT
+ 1 s:O = OPISM Lab, CN = OPISM Stand Intermediate CA
+   i:O = OPISM Lab, CN = OPISM Stand Root CA
+   v:NotBefore: Nov 16 11:11:54 2026 GMT; NotAfter: Nov 15 11:11:54 2031 GMT
+---
+Verify return code: 0 (ok)
+=== f2.cs-202-21.lab
+curl: (60) SSL certificate problem: unable to get local issuer certificate
+Certificate chain
+ 0 s:CN = f2.cs-202-21.lab
+   i:O = Foreign Org, CN = Foreign Intermediate CA
+   v:NotBefore: Nov 16 11:11:54 2026 GMT; NotAfter: Feb 14 11:11:54 2027 GMT
+ 1 s:O = Foreign Org, CN = Foreign Intermediate CA
+   i:O = Foreign Org, CN = Foreign Root CA
+   v:NotBefore: Nov 16 11:11:54 2026 GMT; NotAfter: Nov 15 11:11:54 2031 GMT
+---
+Verify return code: 20 (unable to get local issuer certificate)
+=== f3.cs-202-21.lab
+curl: (60) SSL certificate problem: unable to get local issuer certificate
+Certificate chain
+ 0 s:CN = f3.cs-202-21.lab
+   i:O = OPISM Lab, CN = OPISM Stand Intermediate CA
+   v:NotBefore: Nov 16 11:11:54 2026 GMT; NotAfter: Feb 14 11:11:54 2027 GMT
+---
+Verify return code: 21 (unable to verify the first certificate)
+=== f4.cs-202-21.lab
+curl: (60) SSL certificate problem: certificate has expired
+Certificate chain
+ 0 s:CN = f4.cs-202-21.lab
+   i:O = OPISM Lab, CN = OPISM Stand Intermediate CA
+   v:NotBefore: Apr 30 11:11:54 2026 GMT; NotAfter: Oct 27 11:11:54 2026 GMT
+ 1 s:O = OPISM Lab, CN = OPISM Stand Intermediate CA
+   i:O = OPISM Lab, CN = OPISM Stand Root CA
+   v:NotBefore: Nov 16 11:11:54 2026 GMT; NotAfter: Nov 15 11:11:54 2031 GMT
+---
+Verify return code: 10 (certificate has expired)
+=== f5.cs-202-21.lab
+server: web, f5
+Certificate chain
+ 0 s:CN = f5.cs-202-21.lab
+   i:O = OPISM Lab, CN = OPISM Stand Intermediate CA
+   v:NotBefore: Nov 16 11:11:54 2026 GMT; NotAfter: Feb 14 11:11:54 2027 GMT
+ 1 s:O = OPISM Lab, CN = OPISM Stand Intermediate CA
+   i:O = OPISM Lab, CN = OPISM Stand Root CA
+   v:NotBefore: Nov 16 11:11:54 2026 GMT; NotAfter: Nov 15 11:11:54 2031 GMT
+---
+Verify return code: 0 (ok)
 ```
 
 | Сервер | Помилка `curl` | `Verify return code` | Яка перевірка не пройшла | Рядок виводу, що це доводить | Що має змінити власник сервера |
 |---|---|---|---|---|---|
-| f1 | | | | | |
-| f2 | | | | | |
-| f3 | | | | | |
-| f4 | | | | | |
-| f5 | | | | | |
+| f1 | `no alternative certificate subject name matches target host name` | `0 (ok)` | `Перевірка відповідності імені сервера сертифікату` | `no alternative certificate subject name matches target host name 'f1.cs-202-21.lab'` | `Додати правильне доменне ім'я до SAN (Subject Alternative Name) сертифіката або отримати новий сертифікат.` |
+| f2 | `unable to get local issuer certificate` | `20 (unable to get local issuer certificate)` | `Перевірка довіри до видавця` | `Verify return code: 20 (unable to get local issuer certificate)` | `Замінити сертифікат на виданий довіреним для клієнтів ЦСа` |
+| f3 | `unable to get local issuer certificate` | `21 (unable to verify the first certificate)` | `Перевірка ланцюжка сертифікатів (сервер надсилає лише 1 сертифікат без проміжного Intermediate CA)` | `Verify return code: 21 (unable to verify the first certificate)` | `Налаштувати конфігурацію вебсервера на передачу повного ланцюжка сертифікатів` |
+| f4 | `certificate has expired` | `10 (certificate has expired)` | `Первірка строку дії сертифікату` |`NotAfter: Oct 27 11:11:54 2026 GMT` | `Оновити сертифікат` |
+| f5 | `0k` | `немає` | - | `server: web, f5   Verify return code: 0 (ok)` | - |
 
-1. Для сервера з помилкою `unable to get local issuer certificate` визначте, яка це несправність: сервер не надсилає проміжний сертифікат чи сертифікат виданий центром, якому клієнт не довіряє. Чим ці дві несправності відрізняються у виводі `openssl s_client`?
+1. Для сервера з помилкою `unable to get local issuer certificate` визначте, яка це несправність: сервер не надсилає проміжний сертифікат чи сертифікат виданий центром, якому клієнт не довіряє. Чим ці дві несправності відрізняються у виводі `openssl s_client`?<br>У f3 сервер не надсилає проміжний сертифікат — у виводі openssl s_client ланцюжок містить лише 1 сертифікат (0 s:...) і Verify return code: 21 (unable to verify the first certificate).
+У f2 сертифікат видано недовіреним ЦС — ланцюжок повний (2 сертифікати 0 і 1), але Verify return code: 20 (unable to get local issuer certificate).
 
-2. Якщо серед ваших серверів є сервер з невідповідним ім'ям, чому `openssl s_client` повертає для нього `Verify return code: 0 (ok)`, а `curl` повідомляє про помилку? Якщо такого сервера немає, дайте відповідь для загального випадку.
+2. Якщо серед ваших серверів є сервер з невідповідним ім'ям, чому `openssl s_client` повертає для нього `Verify return code: 0 (ok)`, а `curl` повідомляє про помилку? Якщо такого сервера немає, дайте відповідь для загального випадку.<br>openssl s_client виконує лише криптографічну перевірку ланцюжка і за замовчуванням не перевіряє збіг імені хоста (Hostname validation), тоді як curl вимагає обов'язкової відповідності доменного імені полям SAN сертифіката.
 
-3. Які з п'яти серверів відповіли б на запит `curl -k`? Що при цьому втрачається порівняно з `--cacert`?
+3. Які з п'яти серверів відповіли б на запит `curl -k`? Що при цьому втрачається порівняно з `--cacert`?<br>Відповідають усі 5 серверів. Повністю втрачається захист від атак «Людина посередині» (Man-in-the-Middle, MitM), оскільки клієнт ігнорує будь-які проблеми з сертифікатами.
 
 ## Завдання 5. Ціна нового з'єднання
 
@@ -364,33 +416,59 @@ Verify return code: 0 (ok)
 
 | Етап | TLS 1.3, нове з'єднання | TLS 1.2, нове з'єднання | Повторне використання з'єднання |
 |---|---|---|---|
-| `time_connect` | | | |
-| `time_appconnect` | | | |
-| `time_starttransfer` | | | |
+| `time_connect` | 1 | 1 | 0 |
+| `time_appconnect` | 2 | 3 | 0 |
+| `time_starttransfer` | 3 | 4 | 1 |
 
 Вивід кроків 5.2 і 5.3:
 
 ```text
+0.101281 0.151715 0.208276 0.258775 0.258865 2 1
+0.050602 0.100756 0.155162 0.205596 0.205728 2 1
+0.050566 0.100777 0.155119 0.205627 0.205699 2 1
 
+0.050617 0.100803 0.205380 0.255995 0.256123 2 1
+0.050612 0.100789 0.205842 0.256326 0.256424 2 1
+0.050567 0.100792 0.204910 0.255361 0.255472 2 1
+
+0.050618 0.100774 0.155186 0.205674 0.205760 2 1
+0.000022 0.000000 0.000000 0.050335 0.050416 2 0
+0.000021 0.000000 0.000000 0.050934 0.051030 2 0
 ```
 
 <!-- Значення в мілісекундах. Для нових з'єднань — медіана трьох вимірювань. -->
 
 | Запит | `namelookup` | `connect` | `appconnect` | `starttransfer` | `total` | `num_connects` |
 |---|---|---|---|---|---|---|
-| TLS 1.3, нове | | | | | | |
-| TLS 1.2, нове | | | | | | |
-| 5.3, перший запит | | | | | | |
-| 5.3, другий запит | | | | | | |
-| 5.3, третій запит | | | | | | |
+| TLS 1.3, нове | 50,6 | 100,8 | 155,2 | 205,6 | 205,7 | 1 |
+| TLS 1.2, нове | 50,6 | 100,8 | 205,4 | 256,0  | 256,1 | 1 |
+| 5.3, перший запит | 50,6 | 100,8 | 155,2 | 205,7 | 205,8 | 1 |
+| 5.3, другий запит | 0,02 | 0 | 0 | 51,0 | 50,4 | 0 |
+| 5.3, третій запит | 0,02 | 0 | 0 | 50,9 | 50,3 | 0 |
 
-RTT, визначений вимірюванням, і з якого значення його визначено:
+RTT, визначений вимірюванням, і з якого значення його визначено:  connect − namelookup ≈ 50 мс
 
 1. Виразіть кожне виміряне значення через RTT. Де вимірювання відрізняється від цілого числа RTT і чим це пояснюється?
+Усі метрики `curl` є кумулятивними (від початку запиту `t = 0`):
 
-2. Чому `time_namelookup` не близький до нуля, хоча резолвер уже має ім'я в кеші? За яких умов він був би приблизно вдвічі більшим?
+Для **нових з'єднань**:
+- `time_namelookup` ≈ **1 RTT** (`50,6 мс`) — один DNS-запит/відповідь (лише у найпершому запуску 5.2 було `101,3 мс` ≈ **2 RTT**);
+- `time_connect` ≈ **2 RTT** (`100,8 мс`) — 1 RTT на DNS + 1 RTT на TCP-рукостискання;
+- `time_appconnect` (TLS 1.3) ≈ **3 RTT + ~5 мс** (`155,2 мс`) — 2 RTT (`connect`) + 1 RTT на TLS 1.3 рукостискання;
+- `time_appconnect` (TLS 1.2) ≈ **4 RTT + ~5 мс** (`205,4 мс`) — 2 RTT (`connect`) + 2 RTT на TLS 1.2 рукостискання;
+- `time_starttransfer` / `time_total` (TLS 1.3) ≈ **4 RTT + ~5–6 мс** (`205,6 / 205,7 мс`) — `appconnect` + 1 RTT на HTTP-запит і відповідь;
+- `time_starttransfer` / `time_total` (TLS 1.2) ≈ **5 RTT + ~6 мс** (`256,0 / 256,1 мс`) — `appconnect` + 1 RTT на HTTP-запит і відповідь.
 
-3. Сервіс виконує 200 послідовних запитів до цього сервера. Розрахуйте, скільки часу займе лише очікування мережі, якщо кожен запит встановлює нове з'єднання TLS 1.3, нове з'єднання TLS 1.2 і якщо всі запити йдуть через одне з'єднання.
+Для **повторного використання з'єднання** (крок 5.3, запити 2 і 3):
+- `time_namelookup` ≈ **0 RTT** (`0,02 мс`), `time_connect` = **0 RTT**, `time_appconnect` = **0 RTT** — DNS не виконується, а TCP/TLS-сесія перевикористовується;
+- `time_starttransfer` / `time_total` ≈ **1 RTT** (`50,3–51,0 мс`) — лише HTTP-запит і відповідь.
+
+**Чому є відхилення від цілого числа RTT:**
+Основна похибка (~**5 мс**) з'являється на етапі TLS-рукостискання (`appconnect − connect` становить `54,4 мс` замість `50 мс` у TLS 1.3 і `104,6 мс` замість `100 мс` у TLS 1.2), і далі вона переноситься в `starttransfer` і `total`. Це витрати процесорного часу на асиметричну криптографію (генерація/обмін ключами ECDHE, формування й перевірка підписів) та обробку TLS на клієнті й сервері. Інші переходи (`connect − namelookup ≈ 50,2 мс`, `starttransfer − appconnect ≈ 50,4–50,6 мс`) практично точно дорівнюють 1 RTT (лише +0,2–0,6 мс на локальну обробку стека й HTTP).
+
+2. Чому `time_namelookup` не близький до нуля, хоча резолвер уже має ім'я в кеші? За яких умов він був би приблизно вдвічі більшим?<br>namelookup не нульовий, тому що під час роботи через netem запит до резолвера теж іде по мережі; вдвічі більшим він був би за холодного кешу / двох запитів (A + повтор) або якщо резолвер розташований далеко.
+
+3. Сервіс виконує 200 послідовних запитів до цього сервера. Розрахуйте, скільки часу займе лише очікування мережі, якщо кожен запит встановлює нове з'єднання TLS 1.3, нове з'єднання TLS 1.2 і якщо всі запити йдуть через одне з'єднання.<br>TLS 1.3 (нове з'єднання щоразу): 200 * 205.7 мс = 41,140 мс (≈41.1 с).<br>TLS 1.2 (нове з'єднання щоразу): 200 * 256.1 мс = 51,220 мс (≈51.2 с).<br>Через одне з'єднання (Connection Reuse): 205.8 мс + 199 * 50.4 мс = 10,235.4 мс (≈10.2 с).
 
 ## Висновки
 
@@ -400,10 +478,11 @@ RTT, визначений вимірюванням, і з якого значе�
 
 ## Декларація використання ШІ
 
-Використовувалися інструменти ШІ: <!-- так / ні -->
+Використовувалися інструменти ШІ: так
 
 <!-- Якщо так, заповнити таблицю: один рядок на кожне звернення, що вплинуло на звіт. Промпт наводити дослівно. -->
 
 | № | Інструмент | Промпт (дослівно) | Що використано у звіті і що змінено самостійно |
 |---|---|---|---|
-| 1 | | | |
+| 1 | DeepSeek V4.1 Flash | поясни як робить роботу і що куди вставлять + бланк + методичка + посилання на форк + мій snn | використовувались відповіді на питання |
+| 1 | Gemini 4 Hydrohen | перевір чи все ок та придумай щось для висновку |  |
